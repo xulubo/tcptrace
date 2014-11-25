@@ -18,14 +18,23 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<finalName>restbot</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<finalName>tcptrace</finalName>
 					<descriptors>
-						<descriptor>src/assemble/dist.xml</descriptor>
+						<descriptor>src/main/assemble/dist.xml</descriptor>
 					</descriptors>
 					<archive>
 						<manifest>
-							<mainClass>com.quickplay.restbot.Main</mainClass>
+							<mainClass>com.quickplay.tcptrace.ui.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -118,6 +127,6 @@
 			<artifactId>cglib</artifactId>
 			<version>3.1</version>
 		</dependency>
-											
+
 	</dependencies>
 </project>
