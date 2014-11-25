@@ -28,7 +28,6 @@ public class Trace {
 		while(iter.hasNext()) {
 			SocketTunnel t = iter.next();
 			t.disconnect();
-			iter.remove();
 		}
 	}
 	

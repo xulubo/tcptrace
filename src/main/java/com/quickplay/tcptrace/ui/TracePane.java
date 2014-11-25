@@ -27,7 +27,7 @@ import com.quickplay.tcptrace.Trace;
 public class TracePane extends JPanel{
 	private final JTextArea request = new JTextArea("");
 	private final JTextArea response = new JTextArea("");
-	private final JList<SocketTunnel> uiTunnelList;
+	private final TunnelList<SocketTunnel> uiTunnelList;
 	private final Font  TEXT_FONT 			= new Font("Courier New", Font.BOLD, 16);
 	private final Color BACKGROUND_COLOR 	= Color.LIGHT_GRAY;
 	private final Trace trace;
@@ -35,7 +35,7 @@ public class TracePane extends JPanel{
 	
 	public TracePane(Trace trace) {
 		this.trace = trace;
-		uiTunnelList = new JList<SocketTunnel>(trace.getTunnels());
+		uiTunnelList = new TunnelList<SocketTunnel>(trace.getTunnels());
 		this.setLayout(new BorderLayout());
 		this.add(createToolBar(), BorderLayout.NORTH);
 		this.add(createWorkPane());
@@ -142,15 +142,16 @@ public class TracePane extends JPanel{
 			
 			if (!e.getValueIsAdjusting()) {
 				int i  = uiTunnelList.getSelectedIndex();
-				SocketTunnel t = trace.getTunnels().get(i);
-				System.err.println("selected " + i + " name: " + t.toString());
-				
-				request.setText(t.getLocalBuffer());
-				response.setText(t.getRemoteBuffer());
-				request.setSelectionStart(0);
-				request.setSelectionEnd(0);
-				response.setSelectionStart(0);
-				response.setSelectionEnd(0);
+				if (i>=0 && i<trace.getTunnels().size()) {
+					SocketTunnel t = trace.getTunnels().get(i);
+					System.err.println("selected " + i + " name: " + t.toString());					
+					request.setText(t.getLocalBuffer());
+					response.setText(t.getRemoteBuffer());
+					request.setSelectionStart(0);
+					request.setSelectionEnd(0);
+					response.setSelectionStart(0);
+					response.setSelectionEnd(0);
+				}
 			}
 		}
 

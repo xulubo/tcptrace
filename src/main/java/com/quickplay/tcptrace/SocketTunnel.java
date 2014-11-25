@@ -14,6 +14,7 @@ public class SocketTunnel {
 	final SocketChannel remoteChannel;
 	final SocketChannel localChannel;
 	OnDataReceivedListener listener;
+	OnDisconnectListener onDisconnectListener;
 	String name;
 	
 	StringBuilder localBuf = new StringBuilder();
@@ -22,11 +23,10 @@ public class SocketTunnel {
 	public SocketTunnel(SocketChannel local, SocketChannel remote) {
 		this.remoteChannel = remote;
 		this.localChannel = local;
-		try {
-			this.name = this.localChannel.getRemoteAddress().toString();
-		} catch (IOException e) {
-			this.name = "error";
-		}
+
+		this.name = this.localChannel.socket().getRemoteSocketAddress().toString();
+		this.name +=":";
+		this.name += this.localChannel.socket().getPort();
 	}
 
 	public void setOnDataReceivedListener(OnDataReceivedListener l) {
@@ -87,13 +87,12 @@ public class SocketTunnel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		if (onDisconnectListener != null) {
+			onDisconnectListener.onDisconnect(this);
+		}
 	}
-	
-	@Override
-	public String toString() {
-		return name;
-	}
-	
+
 	public static SocketTunnel createTunnel(SocketChannel localeChannel, Trace cfg) throws IOException {
 		SocketChannel remoteChannel = SocketChannel.open();
 		remoteChannel.connect(new InetSocketAddress(cfg.getRemoteAddress(), cfg.getRemotePort()));
@@ -113,5 +112,21 @@ public class SocketTunnel {
 	
 	public String getRemoteBuffer() {
 		return remoteBuf.toString();
+	}
+
+	public Object getCreationTime() {
+		return creationTime;
+	}
+	
+	public void setOnDisconnectListener(OnDisconnectListener l) {
+		this.onDisconnectListener = l;
+	}
+	
+	public static interface OnDisconnectListener {
+		void onDisconnect(SocketTunnel t);
+	}
+
+	public Object getName() {
+		return name;
 	}
 }
