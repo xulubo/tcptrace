@@ -26,16 +26,18 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.google.gson.Gson;
+import com.quickplay.tcptrace.Configure;
 import com.quickplay.tcptrace.ListenerService;
 import com.quickplay.tcptrace.ListenerService.OnAcceptListener;
 import com.quickplay.tcptrace.SocketTunnel;
 import com.quickplay.tcptrace.Trace;
+import com.quickplay.tcptrace.TraceConfig;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 	private		TabbedPane tabbedPane;
 	Map<Trace, TracePane> tracePaneMap = new HashMap<Trace, TracePane>();
-	List<Trace> configurations = new LinkedList<Trace>();
+	List<TraceConfig> configurations = new LinkedList<TraceConfig>();
 	File configurationFile = null;
 	
     public MainFrame() throws IOException {
@@ -88,21 +90,24 @@ public class MainFrame extends JFrame {
         JMenuItem fileSave = new JMenuItem("Save", Icons.get("save"));
         fileSave.setMnemonic(KeyEvent.VK_S);
 
+        JMenuItem fileSaveAs = new JMenuItem("Save As...", Icons.get("save"));
+        fileSave.setMnemonic(KeyEvent.VK_S);
+
         JMenuItem fileExit = new JMenuItem("Exit", Icons.get("exit"));
         fileExit.setMnemonic(KeyEvent.VK_C);
         fileExit.setToolTipText("Exit application");
         fileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
             ActionEvent.CTRL_MASK));
 
-        fileExit.addActionListener(exitListener);
-
-        fileSave.addActionListener(fileSaveListener);
-        
         fileOpen.addActionListener(fileOpenListener);
+        fileSave.addActionListener(fileSaveListener);
+        fileSaveAs.addActionListener(fileSaveAsListener);
+        fileExit.addActionListener(exitListener);
         
         file.add(fileNew);
         file.add(fileOpen);
         file.add(fileSave);
+        file.add(fileSaveAs);
         file.addSeparator();
         file.add(imp);
         file.addSeparator();
@@ -123,6 +128,7 @@ public class MainFrame extends JFrame {
         JButton btnExit = new JButton("Exit");
 
         btnNew.addActionListener(newFileActionListener);
+        btnOpen.addActionListener(fileOpenListener);
         btnExit.addActionListener(exitListener);
         toolbar.add(btnNew);
         toolbar.add(btnOpen);
@@ -134,13 +140,14 @@ public class MainFrame extends JFrame {
     NewTraceDialog.NewTunnelServerListener newTunnelListener = new NewTraceDialog.NewTunnelServerListener() {
 
 		@Override
-		public void onNewTunnelServer(Trace cfg) {
+		public void onNewTunnelServer(TraceConfig cfg) {
 			startNewServer(cfg);
 		}
     };
 
-    private void startNewServer(Trace trace) {
-		configurations.add(trace);
+    private void startNewServer(TraceConfig cfg) {
+		configurations.add(cfg);
+		Trace trace = new Trace(cfg);
 		final TracePane pane = new TracePane(trace);
 		tabbedPane.addTracePane( trace.getName(), pane );
 		tracePaneMap.put(trace, pane);
@@ -158,16 +165,17 @@ public class MainFrame extends JFrame {
         JFileChooser fileopen = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("configuration files", ".json");
         fileopen.addChoosableFileFilter(filter);
-
+        fileopen.setCurrentDirectory(new File(Configure.getInstance().getProperty("lastconfig")));
         int ret = fileopen.showDialog(null, "Open");
 
         if (ret == JFileChooser.APPROVE_OPTION) {
             File file = fileopen.getSelectedFile();
+        	Configure.getInstance().saveLastOpenFolder(file.getParentFile());
             try {
 				byte[] bytes = Files.readAllBytes(file.toPath());
-				Trace[] configurations = new Gson().fromJson(new String(bytes), Trace[].class);
+				TraceConfig[] configurations = new Gson().fromJson(new String(bytes), TraceConfig[].class);
 				if (configurations != null) {
-					for(Trace c: configurations) {
+					for(TraceConfig c: configurations) {
 						startNewServer(c);
 					}
 				}
@@ -180,25 +188,27 @@ public class MainFrame extends JFrame {
 
     }
     
-    public void saveAs() {
+    public void save() {
         JFileChooser fileopen = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("configuration files", ".json");
         fileopen.addChoosableFileFilter(filter);
-
+        fileopen.setCurrentDirectory(Configure.getInstance().getLastOpenFolder());
         int ret = fileopen.showDialog(null, "Save");
 
         if (ret == JFileChooser.APPROVE_OPTION) {
             File file = fileopen.getSelectedFile();
-            saveAs(file);
+        	Configure.getInstance().saveLastOpenFolder(file.getParentFile());
+            saveConfig(file);
             configurationFile = file;
         }    	
     }
     
-    public void saveAs(File file) {
+    public void saveConfig(File file) {
         try {
 			FileWriter w = new FileWriter(file);
 			w.append(new Gson().toJson(configurations));
 			w.close();
+			Configure.getInstance().saveProperty("lastconfig", file.getAbsolutePath());
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage());
@@ -208,7 +218,7 @@ public class MainFrame extends JFrame {
     private ActionListener newFileActionListener = new ActionListener() {
 
         public void actionPerformed(ActionEvent event) {
-            NewTraceDialog ad = new NewTraceDialog(newTunnelListener);
+            NewTraceDialog ad = new NewTraceDialog(MainFrame.this, newTunnelListener);
             ad.setVisible(true);
         }
     };
@@ -226,9 +236,9 @@ public class MainFrame extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (configurationFile == null) {
-				saveAs();
+				save();
 			} else {
-				saveAs(configurationFile);
+				saveConfig(configurationFile);
 			}
 		}
     };
@@ -237,7 +247,7 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			saveAs();
+			save();
 		}
     	
     };

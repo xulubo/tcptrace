@@ -6,22 +6,29 @@ import java.util.Iterator;
 import java.util.Vector;
 
 public class Trace {
-	int localPort;
-	int remotePort;
-	String remoteAddress;
 	SelectionKey serverSelectionKey;
 	private final Vector<SocketTunnel> tunnels = new Vector<SocketTunnel>();
-
-	public Trace() {
-		
-	}
+	private TraceConfig cfg;
 	
-	public Trace(int localPort, String remoteAddress, int remotePort) {
-		super();
-		this.localPort = localPort;
-		this.remotePort = remotePort;
-		this.remoteAddress = remoteAddress;
+	public int getLocalPort() {
+		return cfg.getLocalPort();
 	}
+
+
+	public int getRemotePort() {
+		return cfg.getRemotePort();
+	}
+
+
+	public String getRemoteAddress() {
+		return cfg.getRemoteAddress();
+	}
+
+
+	public Trace(TraceConfig cfg) {
+		this.cfg = cfg;
+	}
+
 	
 	public void disconnectAll() {
 		Iterator<SocketTunnel> iter = tunnels.iterator();
@@ -44,25 +51,6 @@ public class Trace {
 		}
 	}
 	
-	public int getLocalPort() {
-		return localPort;
-	}
-	public void setLocalPort(int localPort) {
-		this.localPort = localPort;
-	}
-	public int getRemotePort() {
-		return remotePort;
-	}
-	public void setRemotePort(int remotePort) {
-		this.remotePort = remotePort;
-	}
-	public String getRemoteAddress() {
-		return remoteAddress;
-	}
-	public void setRemoteAddress(String remoteAddress) {
-		this.remoteAddress = remoteAddress;
-	}
-	
 	public SelectionKey getServerSelectionKey() {
 		return serverSelectionKey;
 	}
@@ -80,7 +68,7 @@ public class Trace {
 	}
 
 	public String getName() {
-		return "" + getLocalPort() + "->" + getRemoteAddress() + ":" + getRemotePort();
+		return "" + cfg.getLocalPort() + "->" + cfg.getRemoteAddress() + ":" + cfg.getRemotePort();
 	}
 
 	public void removeDisconnected() {
@@ -91,5 +79,6 @@ public class Trace {
 			}
 		}
 	}
+	
 	
 }

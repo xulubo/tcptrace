@@ -2,6 +2,7 @@ package com.quickplay.tcptrace;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
@@ -24,9 +25,14 @@ public class SocketTunnel {
 		this.remoteChannel = remote;
 		this.localChannel = local;
 
-		this.name = this.localChannel.socket().getRemoteSocketAddress().toString();
-		this.name +=":";
-		this.name += this.localChannel.socket().getPort();
+		SocketAddress addr = this.localChannel.socket().getRemoteSocketAddress();
+		if (addr instanceof InetSocketAddress) {
+			
+			this.name = ((InetSocketAddress)addr).getHostString();
+		}
+		else {
+			this.name = addr.toString();		
+		}
 	}
 
 	public void setOnDataReceivedListener(OnDataReceivedListener l) {
@@ -93,9 +99,9 @@ public class SocketTunnel {
 		}
 	}
 
-	public static SocketTunnel createTunnel(SocketChannel localeChannel, Trace cfg) throws IOException {
+	public static SocketTunnel createTunnel(SocketChannel localeChannel, Trace trace) throws IOException {
 		SocketChannel remoteChannel = SocketChannel.open();
-		remoteChannel.connect(new InetSocketAddress(cfg.getRemoteAddress(), cfg.getRemotePort()));
+		remoteChannel.connect(new InetSocketAddress(trace.getRemoteAddress(), trace.getRemotePort()));
 		SocketTunnel tunnel = new SocketTunnel(localeChannel, remoteChannel);
 
 		return tunnel;

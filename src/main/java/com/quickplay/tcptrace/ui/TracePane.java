@@ -18,6 +18,9 @@ import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.quickplay.tcptrace.SocketTunnel;
 import com.quickplay.tcptrace.SocketTunnel.OnDataReceivedListener;
 import com.quickplay.tcptrace.Trace;
@@ -25,11 +28,12 @@ import com.quickplay.tcptrace.Trace;
 
 @SuppressWarnings("serial")
 public class TracePane extends JPanel{
+	private static Logger logger = LoggerFactory.getLogger(TracePane.class);
 	private final JTextArea request = new JTextArea("");
 	private final JTextArea response = new JTextArea("");
 	private final TunnelList<SocketTunnel> uiTunnelList;
 	private final Font  TEXT_FONT 			= new Font("Courier New", Font.BOLD, 16);
-	private final Color BACKGROUND_COLOR 	= Color.LIGHT_GRAY;
+	private final Color BACKGROUND_COLOR 	= new Color(242,242,242);
 	private final Trace trace;
 	private OnCloseListener onCloseListener;
 	
@@ -55,7 +59,7 @@ public class TracePane extends JPanel{
 	}
 	
 	private JSplitPane createWorkPane() {
-		uiTunnelList.setPreferredSize(new Dimension(200, 500));
+		uiTunnelList.setPreferredSize(new Dimension(235, 500));
 		uiTunnelList.setBackground(BACKGROUND_COLOR);
 		request.setFont(TEXT_FONT);
 		response.setFont(TEXT_FONT);
@@ -144,7 +148,7 @@ public class TracePane extends JPanel{
 				int i  = uiTunnelList.getSelectedIndex();
 				if (i>=0 && i<trace.getTunnels().size()) {
 					SocketTunnel t = trace.getTunnels().get(i);
-					System.err.println("selected " + i + " name: " + t.toString());					
+					logger.debug("selected index {} name: {}", i, t.toString());					
 					request.setText(t.getLocalBuffer());
 					response.setText(t.getRemoteBuffer());
 					request.setSelectionStart(0);

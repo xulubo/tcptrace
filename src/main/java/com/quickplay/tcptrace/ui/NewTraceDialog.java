@@ -2,6 +2,7 @@ package com.quickplay.tcptrace.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -14,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,15 +23,17 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
 import com.quickplay.tcptrace.Trace;
+import com.quickplay.tcptrace.TraceConfig;
 
 @SuppressWarnings("serial")
 public class NewTraceDialog  extends JDialog {
 
 	NewTunnelServerListener listener = null;
 	
-    public NewTraceDialog(NewTunnelServerListener listener) {
+    public NewTraceDialog(Component parent, NewTunnelServerListener listener) {
     	this.listener = listener;
         initUI();
+        setLocationRelativeTo(parent);
     }
 
     public final void initUI() {
@@ -67,7 +71,7 @@ public class NewTraceDialog  extends JDialog {
             	if (listener != null) {
             		Integer.parseInt(localPort.getText());
             		Integer.parseInt(remotePort.getText());
-            		listener.onNewTunnelServer(new Trace(
+            		listener.onNewTunnelServer(new TraceConfig(
             				Integer.parseInt(localPort.getText()),
             				remoteAddress.getText(),
                     		Integer.parseInt(remotePort.getText())
@@ -102,7 +106,6 @@ public class NewTraceDialog  extends JDialog {
 
         setTitle("New TCP Tunnel");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         setSize(500, 250);
     }
     
@@ -111,7 +114,7 @@ public class NewTraceDialog  extends JDialog {
     }
     
     public interface NewTunnelServerListener {
-    	public void onNewTunnelServer(Trace tunnel);
+    	public void onNewTunnelServer(TraceConfig cfg);
     }
     
     private JPanel createConfigRow(String label, JTextArea text) {
@@ -137,7 +140,7 @@ public class NewTraceDialog  extends JDialog {
     
     private JTextArea createTextArea(String text) {
     	Font font = new Font("Verdana", Font.BOLD, 16);
-    	final JTextArea area = new JTextArea(text);
+    	final TextArea area = new TextArea(text);
     	area.setMargin(new Insets(7, 0, 0, 0));
     	area.setFont(font);
     	area.setPreferredSize(new Dimension(260, 30));

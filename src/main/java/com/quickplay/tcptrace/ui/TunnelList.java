@@ -8,6 +8,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import com.quickplay.tcptrace.SocketTunnel;
@@ -29,7 +30,9 @@ public class TunnelList<E> extends JScrollPane implements OnDisconnectListener {
 		table.setBackground(Color.LIGHT_GRAY);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.setViewportView(table);
-		this.setBackground(Color.LIGHT_GRAY);
+		table.setOpaque(false);
+		table.setLayout(null);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Object.class)).setOpaque(false);	
 		
 		setListData(data);
 	}
@@ -41,6 +44,8 @@ public class TunnelList<E> extends JScrollPane implements OnDisconnectListener {
 		}
 		
 		table.setModel(new MyTableModel());
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.getColumnModel().getColumn(0).setPreferredWidth(80);
 	}
 
 	public void addListSelectionListener(
